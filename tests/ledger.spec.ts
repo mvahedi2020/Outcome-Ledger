@@ -1,28 +1,384 @@
-import {test,expect,type Page} from '@playwright/test'
-import {KEY,fresh,snapshot,LIMIT} from '../src/domain'
-const start=async(page:Page)=>{await page.goto('./');await expect(page.getByRole('heading',{name:'From output to benefit'})).toBeVisible()}
-const preview=async(page:Page)=>{await page.getByRole('button',{name:'Preview decision'}).click();await expect(page.getByRole('dialog')).toBeVisible()}
-const confirm=async(page:Page)=>{await preview(page);await page.getByRole('button',{name:'Confirm review',exact:true}).click();await expect(page.getByRole('button',{name:'Preview decision'})).toBeFocused()}
-const raw=async(page:Page)=>page.evaluate(key=>localStorage.getItem(key),KEY)
-test('primary journey and self-contained immutable export',async({page})=>{
- await start(page);await page.getByRole('button',{name:'Inspect Context card'}).click();await expect(page.getByRole('heading',{name:'Context card',exact:true})).toBeVisible()
- await expect(page.locator('.total')).toContainText('60');await expect(page.locator('.limit')).toContainText('coincidental');await preview(page);await expect(page.getByRole('dialog')).toContainText('B1: Cedar');await page.getByRole('button',{name:'Cancel',exact:true}).click();expect(await raw(page)).toBeNull()
- await confirm(page);await expect(page.locator('.record')).toHaveCount(1);await page.getByLabel('Evidence scenario').selectOption('missing');await expect(page.locator('.provisional')).toContainText('no recognized change');await page.locator('.record').getByText('Preserved review evidence', {exact:true}).click();await expect(page.locator('.record')).toContainText('200 minutes/week')
- const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export report'}).click();const file=await download;const path=await file.path();const {readFile}=await import('node:fs/promises');const report=JSON.parse(await readFile(path!,'utf8'));expect(report.currentEvidence.scenario).toBe('missing');expect(report.ledger.reviews[0].evidence.scenario).toBe('compatible');expect(report.ledger.reviews[0].evidence.overlap.net).toBe(60);expect(report.ledger.reviews[0].evidence.references).toHaveLength(4);expect(report.ledger.reviews[0].evidence.causalLimit).toContain('No control group')
- await page.reload();await expect(page.locator('.record')).toHaveCount(1);await expect(page.getByLabel('Evidence scenario')).toHaveValue('missing')
-})
-test('missing and incompatible recovery never recognizes false benefit',async({page})=>{await start(page);for(const scenario of ['missing','wrong']){await page.getByLabel('Evidence scenario').selectOption(scenario);await expect(page.locator('.provisional')).toContainText('no recognized change');await expect(page.locator('.evidence-grid').nth(0)).toContainText('140');await expect(page.locator('.evidence-grid')).not.toContainText('160');await page.getByText('Evidence references and interpretation limits',{exact:true}).click();await expect(page.locator('.evidence details')).toContainText(scenario==='wrong'?'30 Elm handoffs':'Baseline exposure is missing');await expect(page.locator('.evidence details')).not.toContainText('Both periods contain 20');await page.getByText('Evidence references and interpretation limits',{exact:true}).click()};await page.getByLabel('Evidence scenario').selectOption('compatible');await expect(page.locator('.eligible')).toContainText('200 baseline − 140 observation = 60')})
-test('all decision directions preserve owner and questions',async({page})=>{await start(page);for(const direction of ['continue','investigate','change']){await page.getByLabel('Direction',{exact:true}).selectOption(direction);await confirm(page)}await expect(page.locator('.record')).toHaveCount(3);for(const record of await page.locator('.record').all()){await expect(record).toContainText('Nia');await expect(record).toContainText('case complexity')}})
-test('withdrawal keeps original review and cancellation is harmless',async({page})=>{await start(page);await confirm(page);const original=await raw(page);await page.getByRole('button',{name:'Preview withdrawal'}).click();await page.getByLabel('Withdrawal reason').fill('Evidence superseded by a new population.');await page.keyboard.press('Escape');expect(await raw(page)).toBe(original);await expect(page.getByRole('button',{name:'Preview withdrawal'})).toBeFocused();await page.getByRole('button',{name:'Preview withdrawal'}).click();await page.getByLabel('Withdrawal reason').fill('Evidence superseded by a new population.');await page.getByRole('button',{name:'Confirm withdrawal'}).click();await expect(page.locator('.record')).toContainText('Withdrawn');await expect(page.locator('.record')).toContainText('Original review retained');const record=JSON.parse((await raw(page))!);expect(record.reviews).toHaveLength(1);expect(record.withdrawals).toHaveLength(1)})
-test('reset preview count cancellation focus and confirmed recovery',async({page})=>{await start(page);await confirm(page);const before=await raw(page);await page.getByRole('button',{name:'Preview reset'}).click();await expect(page.getByRole('dialog')).toContainText('remove 1 reviews');await page.keyboard.press('Escape');expect(await raw(page)).toBe(before);await expect(page.getByRole('button',{name:'Preview reset'})).toBeFocused();await page.getByRole('button',{name:'Preview reset'}).click();await page.getByRole('button',{name:'Confirm reset'}).click();await expect(page.locator('.record')).toHaveCount(0)})
-test('conflicting raw value rejects review and compatible load recovers',async({page})=>{await start(page);await preview(page);await page.evaluate(({KEY,f})=>localStorage.setItem(KEY,JSON.stringify({...f,scenario:'wrong',revision:1})),{KEY,f:fresh()});await page.getByRole('button',{name:'Confirm review'}).click();await expect(page.getByRole('status')).toContainText('Saved state changed');await expect(page.locator('.record')).toHaveCount(0);await page.getByRole('button',{name:'Load saved state'}).click();await expect(page.getByLabel('Evidence scenario')).toHaveValue('wrong');await confirm(page);await expect(page.locator('.record')).toHaveCount(1)})
-test('reset conflict does not erase concurrent record',async({page})=>{await start(page);await confirm(page);await page.getByRole('button',{name:'Preview reset'}).click();const before=await raw(page);await page.evaluate(({KEY,before})=>localStorage.setItem(KEY,before+' '),{KEY,before});await page.getByRole('button',{name:'Confirm reset'}).click();expect(await raw(page)).toBe(before+' ');await expect(page.locator('.record')).toHaveCount(1);await expect(page.getByRole('status')).toContainText('Reset rejected')})
-test('invalid record preservation and reset recovery',async({page})=>{await page.addInitScript(key=>localStorage.setItem(key,'{damaged'),KEY);await start(page);await expect(page.getByRole('status')).toContainText('Invalid saved data preserved');await confirm(page);expect(await raw(page)).toBe('{damaged');await page.getByRole('button',{name:'Preview reset'}).click();await page.getByRole('button',{name:'Confirm reset'}).click();expect(JSON.parse((await raw(page))!).reviews).toHaveLength(0)})
-test('getItem failure never writes unseen bytes',async({page})=>{await page.addInitScript(()=>{(window as unknown as {writes:number}).writes=0;Storage.prototype.getItem=()=>{throw new DOMException('blocked','SecurityError')};Storage.prototype.setItem=()=>{(window as unknown as {writes:number}).writes++}});await start(page);await confirm(page);await expect(page.locator('.record')).toHaveCount(1);await expect(page.getByRole('status')).toContainText('refresh or closing');expect(await page.evaluate(()=>(window as unknown as {writes:number}).writes)).toBe(0);await page.getByRole('button',{name:'Preview reset'}).click();await expect(page.getByRole('dialog')).toContainText('Reset is unavailable');await expect(page.getByRole('button',{name:'Confirm reset'})).toBeDisabled()})
-test('storage property SecurityError is handled',async({page})=>{await page.addInitScript(()=>Object.defineProperty(window,'localStorage',{get:()=>{throw new DOMException('blocked','SecurityError')}}));await start(page);await confirm(page);await expect(page.locator('.record')).toHaveCount(1);await expect(page.getByRole('status')).toContainText('memory only')})
-test('write failure keeps memory review with explicit loss notice',async({page})=>{await page.addInitScript(()=>{Storage.prototype.setItem=()=>{throw new DOMException('quota','QuotaExceededError')}});await start(page);await confirm(page);await expect(page.locator('.record')).toHaveCount(1);await expect(page.getByRole('status')).toContainText('refresh or closing this page loses');await page.reload();await expect(page.locator('.record')).toHaveCount(0)})
-test('unreadable storage becoming readable rejects stale memory preview',async({page})=>{await start(page);await page.evaluate(()=>{Storage.prototype.getItem=()=>{throw Error('blocked')}});await page.getByRole('button',{name:'Load saved state'}).click();await preview(page);await page.evaluate(()=>{Storage.prototype.getItem=()=>null});await page.getByRole('button',{name:'Confirm review'}).click();await expect(page.getByRole('status')).toContainText('became readable');await expect(page.locator('.record')).toHaveCount(0)})
-test('history cap stops eviction and reset recovers',async({page})=>{const f=fresh();f.reviews=Array.from({length:LIMIT},(_,i)=>({id:'review-'+i,at:'2026-10-04T09:00:00Z',choice:'investigate' as const,owner:'Nia',rationale:'Check baseline.',questions:'Case mix?',evidence:snapshot('compatible')}));await page.addInitScript(({KEY,f})=>localStorage.setItem(KEY,JSON.stringify(f)),{KEY,f});await start(page);await expect(page.locator('.record')).toHaveCount(12);await expect(page.getByRole('button',{name:'Preview decision'})).toBeDisabled();await expect(page.locator('.review')).toContainText('History is full');await page.getByRole('button',{name:'Preview reset'}).click();await page.getByRole('button',{name:'Confirm reset'}).click();await expect(page.getByRole('button',{name:'Preview decision'})).toBeEnabled()})
-test('native dialog traps keyboard and Escape returns focus',async({page})=>{await start(page);await page.getByRole('button',{name:'Preview decision'}).focus();await page.keyboard.press('Enter');for(let i=0;i<9;i++){await page.keyboard.press('Tab');expect(await page.evaluate(()=>Boolean(document.activeElement?.closest('dialog')))).toBe(true)}await page.keyboard.press('Escape');await expect(page.getByRole('button',{name:'Preview decision'})).toBeFocused();await expect(page.locator('.record')).toHaveCount(0)})
-for(const viewport of [{width:320,height:850},{width:390,height:844},{width:1280,height:633}])test(`layout and complete review ${viewport.width}x${viewport.height}`,async({page})=>{await page.setViewportSize(viewport);await start(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await preview(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.getByRole('button',{name:'Confirm review'}).click();await expect(page.locator('.record')).toHaveCount(1);await page.screenshot({path:`evidence/viewport-${viewport.width}.png`,fullPage:true})})
-test('production security metadata docs route and no external requests',async({page})=>{const external:string[]=[];page.on('request',r=>{if(!r.url().startsWith('http://127.0.0.1:4195/')&&!r.url().startsWith('blob:'))external.push(r.url())});await start(page);await expect(page.locator('meta[name="referrer"]')).toHaveAttribute('content','no-referrer');await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveAttribute('content',/object-src 'none'/);for(const doc of ['Product_Brief','PRD','Sample_Contract','Case_Study','Decisions_and_Risks','Validation','Sample_Walkthrough']){const response=await page.request.get(`docs/product/${doc}.md`);expect(response.ok()).toBe(true);expect(await response.text()).toContain('#')}expect(external).toEqual([])})
+import { test, expect, type Page } from "@playwright/test";
+import { KEY, fresh, snapshot, LIMIT } from "../src/domain";
+const start = async (page: Page) => {
+  await page.goto("./");
+  await expect(
+    page.getByRole("heading", { name: "From output to benefit" }),
+  ).toBeVisible();
+};
+const preview = async (page: Page) => {
+  await page.getByRole("button", { name: "Preview decision" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+};
+const confirm = async (page: Page) => {
+  await preview(page);
+  await page
+    .getByRole("button", { name: "Confirm review", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Preview decision" }),
+  ).toBeFocused();
+};
+const raw = async (page: Page) =>
+  page.evaluate((key) => localStorage.getItem(key), KEY);
+test("primary journey and self-contained immutable export", async ({
+  page,
+}) => {
+  await start(page);
+  await page.getByRole("button", { name: "Inspect Context card" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Context card", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".total")).toContainText("60");
+  await expect(page.locator(".limit")).toContainText("coincidental");
+  await preview(page);
+  await expect(page.getByRole("dialog")).toContainText("B1: Cedar");
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(await raw(page)).toBeNull();
+  await confirm(page);
+  await expect(page.locator(".record")).toHaveCount(1);
+  await page.getByLabel("Evidence scenario").selectOption("missing");
+  await expect(page.locator(".provisional")).toContainText(
+    "no recognized change",
+  );
+  await page
+    .locator(".record")
+    .getByText("Preserved review evidence", { exact: true })
+    .click();
+  await expect(page.locator(".record")).toContainText("200 minutes/week");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export report" }).click();
+  const file = await download;
+  const path = await file.path();
+  const { readFile } = await import("node:fs/promises");
+  const report = JSON.parse(await readFile(path!, "utf8"));
+  expect(report.currentEvidence.scenario).toBe("missing");
+  expect(report.ledger.reviews[0].evidence.scenario).toBe("compatible");
+  expect(report.ledger.reviews[0].evidence.overlap.net).toBe(60);
+  expect(report.ledger.reviews[0].evidence.references).toHaveLength(4);
+  expect(report.ledger.reviews[0].evidence.causalLimit).toContain(
+    "No control group",
+  );
+  await page.reload();
+  await expect(page.locator(".record")).toHaveCount(1);
+  await expect(page.getByLabel("Evidence scenario")).toHaveValue("missing");
+});
+test("missing and incompatible recovery never recognizes false benefit", async ({
+  page,
+}) => {
+  await start(page);
+  for (const scenario of ["missing", "wrong"]) {
+    await page.getByLabel("Evidence scenario").selectOption(scenario);
+    await expect(page.locator(".provisional")).toContainText(
+      "no recognized change",
+    );
+    await expect(page.locator(".evidence-grid").nth(0)).toContainText("140");
+    await expect(page.locator(".evidence-grid")).not.toContainText("160");
+    await page
+      .getByText("Evidence references and interpretation limits", {
+        exact: true,
+      })
+      .click();
+    await expect(page.locator(".evidence details")).toContainText(
+      scenario === "wrong" ? "30 Elm handoffs" : "Baseline exposure is missing",
+    );
+    await expect(page.locator(".evidence details")).not.toContainText(
+      "Both periods contain 20",
+    );
+    await page
+      .getByText("Evidence references and interpretation limits", {
+        exact: true,
+      })
+      .click();
+  }
+  await page.getByLabel("Evidence scenario").selectOption("compatible");
+  await expect(page.locator(".eligible")).toContainText(
+    "200 baseline − 140 observation = 60",
+  );
+});
+test("all decision directions preserve owner and questions", async ({
+  page,
+}) => {
+  await start(page);
+  for (const direction of ["continue", "investigate", "change"]) {
+    await page.getByLabel("Direction", { exact: true }).selectOption(direction);
+    await confirm(page);
+  }
+  await expect(page.locator(".record")).toHaveCount(3);
+  for (const record of await page.locator(".record").all()) {
+    await expect(record).toContainText("Nia");
+    await expect(record).toContainText("case complexity");
+  }
+});
+test("withdrawal keeps original review and cancellation is harmless", async ({
+  page,
+}) => {
+  await start(page);
+  await confirm(page);
+  const original = await raw(page);
+  await page.getByRole("button", { name: "Preview withdrawal" }).click();
+  await page
+    .getByLabel("Withdrawal reason")
+    .fill("Evidence superseded by a new population.");
+  await page.keyboard.press("Escape");
+  expect(await raw(page)).toBe(original);
+  await expect(
+    page.getByRole("button", { name: "Preview withdrawal" }),
+  ).toBeFocused();
+  await page.getByRole("button", { name: "Preview withdrawal" }).click();
+  await page
+    .getByLabel("Withdrawal reason")
+    .fill("Evidence superseded by a new population.");
+  await page.getByRole("button", { name: "Confirm withdrawal" }).click();
+  await expect(page.locator(".record")).toContainText("Withdrawn");
+  await expect(page.locator(".record")).toContainText(
+    "Original review retained",
+  );
+  const record = JSON.parse((await raw(page))!);
+  expect(record.reviews).toHaveLength(1);
+  expect(record.withdrawals).toHaveLength(1);
+});
+test("reset preview count cancellation focus and confirmed recovery", async ({
+  page,
+}) => {
+  await start(page);
+  await confirm(page);
+  const before = await raw(page);
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  await expect(page.getByRole("dialog")).toContainText("remove 1 reviews");
+  await page.keyboard.press("Escape");
+  expect(await raw(page)).toBe(before);
+  await expect(
+    page.getByRole("button", { name: "Preview reset" }),
+  ).toBeFocused();
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  await page.getByRole("button", { name: "Confirm reset" }).click();
+  await expect(page.locator(".record")).toHaveCount(0);
+});
+test("conflicting raw value rejects review and compatible load recovers", async ({
+  page,
+}) => {
+  await start(page);
+  await preview(page);
+  await page.evaluate(
+    ({ KEY, f }) =>
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({ ...f, scenario: "wrong", revision: 1 }),
+      ),
+    { KEY, f: fresh() },
+  );
+  await page.getByRole("button", { name: "Confirm review" }).click();
+  await expect(page.getByRole("status")).toContainText("Saved state changed");
+  await expect(page.locator(".record")).toHaveCount(0);
+  await page.getByRole("button", { name: "Load saved state" }).click();
+  await expect(page.getByLabel("Evidence scenario")).toHaveValue("wrong");
+  await confirm(page);
+  await expect(page.locator(".record")).toHaveCount(1);
+});
+test("reset conflict does not erase concurrent record", async ({ page }) => {
+  await start(page);
+  await confirm(page);
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  const before = await raw(page);
+  await page.evaluate(
+    ({ KEY, before }) => localStorage.setItem(KEY, before + " "),
+    { KEY, before },
+  );
+  await page.getByRole("button", { name: "Confirm reset" }).click();
+  expect(await raw(page)).toBe(before + " ");
+  await expect(page.locator(".record")).toHaveCount(1);
+  await expect(page.getByRole("status")).toContainText("Reset rejected");
+});
+test("invalid record preservation and reset recovery", async ({ page }) => {
+  await page.addInitScript((key) => localStorage.setItem(key, "{damaged"), KEY);
+  await start(page);
+  await expect(page.getByRole("status")).toContainText(
+    "Invalid saved data preserved",
+  );
+  await confirm(page);
+  expect(await raw(page)).toBe("{damaged");
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  await page.getByRole("button", { name: "Confirm reset" }).click();
+  expect(JSON.parse((await raw(page))!).reviews).toHaveLength(0);
+});
+test("getItem failure never writes unseen bytes", async ({ page }) => {
+  await page.addInitScript(() => {
+    (window as unknown as { writes: number }).writes = 0;
+    Storage.prototype.getItem = () => {
+      throw new DOMException("blocked", "SecurityError");
+    };
+    Storage.prototype.setItem = () => {
+      (window as unknown as { writes: number }).writes++;
+    };
+  });
+  await start(page);
+  await confirm(page);
+  await expect(page.locator(".record")).toHaveCount(1);
+  await expect(page.getByRole("status")).toContainText("refresh or closing");
+  expect(
+    await page.evaluate(() => (window as unknown as { writes: number }).writes),
+  ).toBe(0);
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  await expect(page.getByRole("dialog")).toContainText("Reset is unavailable");
+  await expect(
+    page.getByRole("button", { name: "Confirm reset" }),
+  ).toBeDisabled();
+});
+test("storage property SecurityError is handled", async ({ page }) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(window, "localStorage", {
+      get: () => {
+        throw new DOMException("blocked", "SecurityError");
+      },
+    }),
+  );
+  await start(page);
+  await confirm(page);
+  await expect(page.locator(".record")).toHaveCount(1);
+  await expect(page.getByRole("status")).toContainText("memory only");
+});
+test("write failure keeps memory review with explicit loss notice", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException("quota", "QuotaExceededError");
+    };
+  });
+  await start(page);
+  await confirm(page);
+  await expect(page.locator(".record")).toHaveCount(1);
+  await expect(page.getByRole("status")).toContainText(
+    "refresh or closing this page loses",
+  );
+  await page.reload();
+  await expect(page.locator(".record")).toHaveCount(0);
+});
+test("unreadable storage becoming readable rejects stale memory preview", async ({
+  page,
+}) => {
+  await start(page);
+  await page.evaluate(() => {
+    Storage.prototype.getItem = () => {
+      throw Error("blocked");
+    };
+  });
+  await page.getByRole("button", { name: "Load saved state" }).click();
+  await preview(page);
+  await page.evaluate(() => {
+    Storage.prototype.getItem = () => null;
+  });
+  await page.getByRole("button", { name: "Confirm review" }).click();
+  await expect(page.getByRole("status")).toContainText("became readable");
+  await expect(page.locator(".record")).toHaveCount(0);
+});
+test("history cap stops eviction and reset recovers", async ({ page }) => {
+  const f = fresh();
+  f.reviews = Array.from({ length: LIMIT }, (_, i) => ({
+    id: "review-" + i,
+    at: "2026-10-04T09:00:00Z",
+    choice: "investigate" as const,
+    owner: "Nia",
+    rationale: "Check baseline.",
+    questions: "Case mix?",
+    evidence: snapshot("compatible"),
+  }));
+  await page.addInitScript(
+    ({ KEY, f }) => localStorage.setItem(KEY, JSON.stringify(f)),
+    { KEY, f },
+  );
+  await start(page);
+  await expect(page.locator(".record")).toHaveCount(12);
+  await expect(
+    page.getByRole("button", { name: "Preview decision" }),
+  ).toBeDisabled();
+  await expect(page.locator(".review")).toContainText("History is full");
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  await page.getByRole("button", { name: "Confirm reset" }).click();
+  await expect(
+    page.getByRole("button", { name: "Preview decision" }),
+  ).toBeEnabled();
+});
+test("native dialog traps keyboard and Escape returns focus", async ({
+  page,
+}) => {
+  await start(page);
+  await page.getByRole("button", { name: "Preview decision" }).focus();
+  await page.keyboard.press("Enter");
+  for (let i = 0; i < 9; i++) {
+    await page.keyboard.press("Tab");
+    expect(
+      await page.evaluate(() =>
+        Boolean(document.activeElement?.closest("dialog")),
+      ),
+    ).toBe(true);
+  }
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Preview decision" }),
+  ).toBeFocused();
+  await expect(page.locator(".record")).toHaveCount(0);
+});
+for (const viewport of [
+  { width: 320, height: 850 },
+  { width: 390, height: 844 },
+  { width: 1280, height: 633 },
+])
+  test(`layout and complete review ${viewport.width}x${viewport.height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    await start(page);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await preview(page);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.getByRole("button", { name: "Confirm review" }).click();
+    await expect(page.locator(".record")).toHaveCount(1);
+    await page.screenshot({
+      path: `evidence/viewport-${viewport.width}.png`,
+      fullPage: true,
+    });
+  });
+test("production security metadata docs route and no external requests", async ({
+  page,
+}) => {
+  const external: string[] = [];
+  page.on("request", (r) => {
+    if (
+      !r.url().startsWith("http://127.0.0.1:4195/") &&
+      !r.url().startsWith("blob:")
+    )
+      external.push(r.url());
+  });
+  await start(page);
+  await expect(page.locator('meta[name="referrer"]')).toHaveAttribute(
+    "content",
+    "no-referrer",
+  );
+  await expect(
+    page.locator('meta[http-equiv="Content-Security-Policy"]'),
+  ).toHaveAttribute("content", /object-src 'none'/);
+  for (const doc of [
+    "Product_Brief",
+    "PRD",
+    "Sample_Contract",
+    "Case_Study",
+    "Decisions_and_Risks",
+    "Validation",
+    "Sample_Walkthrough",
+  ]) {
+    const response = await page.request.get(`docs/product/${doc}.md`);
+    expect(response.ok()).toBe(true);
+    expect(await response.text()).toContain("#");
+  }
+  expect(external).toEqual([]);
+});
