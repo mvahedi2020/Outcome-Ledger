@@ -2,6 +2,8 @@
 
 **What evidence is needed to recognize a benefit, and when should the next investment be reconsidered?** Outcome Ledger is a fictional PM workspace for a support program owner who needs to trace delivery, adoption, and value without treating a shipped output as a proven benefit.
 
+[Open the interactive demo](https://mvahedi2020.github.io/Outcome-Ledger/).
+
 Start with the [PM case study](docs/product/Case_Study.md), follow the [reviewer walkthrough](docs/product/Sample_Walkthrough.md), and inspect the [sample contract](docs/product/Sample_Contract.md). The [product brief](docs/product/Product_Brief.md), [PRD](docs/product/PRD.md), [decisions and risks](docs/product/Decisions_and_Risks.md), and [validation](docs/product/Validation.md) explain the scope and evidence.
 
 The Cedar support sample traces a delivered routing guide and context card to measured adoption. A compatible baseline supports a descriptive change from 200 to 140 minutes/week. A separate atom-based forecast reconciles 40 + 30 − 10 = 60 hypothetical minutes/week. Those equal values are coincidental and never summed or used as causal corroboration. Missing and wrong-population baseline scenarios keep the raw observation but remove the recognized change. A reviewed continue, investigate, or change decision preserves an immutable snapshot and exports a self-contained JSON report.

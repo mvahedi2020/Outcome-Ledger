@@ -30,4 +30,6 @@ All records and measurements are fictional. The forecast durations and full-use 
 
 ## Publication
 
-Publication is pending the primary agent’s independent review, authorized remote creation and push, and public production/parity checks. This implementation agent created no remote and pushed no commits. Local success does not establish public availability.
+The first public release was independently verified on October 4, 2026 at source `3c7eea1c9ac461ce610008622063690214157d01`: [verification and Pages workflow](https://github.com/mvahedi2020/Outcome-Ledger/actions/runs/37191682318) succeeded, clean local/public main agreed, and all 10 deployed files matched the local build, release artifact and live bytes. Pages was enabled before the first push. All 18 browser journeys passed against the public URL. Separate reviewer replay verified incompatible-baseline blocking, recovery to compatible evidence, a reviewed decision, preserved evidence after selecting a missing baseline, and withdrawal. No browser errors were observed.
+
+Later documentation updates retain the tested application behavior and receive their own publication checks. Public availability is software evidence; human understanding, research and business value remain unobserved.
