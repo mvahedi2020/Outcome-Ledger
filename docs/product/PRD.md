@@ -16,3 +16,18 @@ Inspect both outputs; select missing baseline and explain why delivery does not 
 ## Proposed evaluation
 
 In future moderated sessions, ask reviewers to distinguish output versus benefit, explain baseline compatibility, detect double counting, and name an accountable owner. Observe correctness and reasoning before timing. Software tests establish behavior only; no participant sessions or comprehension results are claimed.
+
+## Work-package traceability
+
+| Package | Implemented contract and reviewer evidence |
+|---|---|
+| S087 | Primary program owner, benefit-recognition decision, milestone-checklist alternative, fictional boundary; Product Brief |
+| S088 | Original Cedar fixtures, exposure rules, atom assumptions, review/recovery states; Sample Contract |
+| S089 | Node 24 static foundation, real selection/navigation, security metadata, pinned CI/Pages configuration |
+| S090 | Output-to-adoption-to-benefit map, initiative owners and explicit windows |
+| S091 | Compatible, missing, and wrong-population baseline eligibility with raw observation retained |
+| S092 | Unique workflow-atom forecast union and explicit separation from observed comparison |
+| S093 | Reviewed direction, immutable evidence/estimate versions, references, questions, owner, self-contained export |
+| S094 | Exact saved-byte/readability boundaries, invalid preservation, memory loss notice, reset, withdrawal, history-cap recovery |
+| S095 | Keyboard/focus, narrow and short viewport checks, Case Study, proposed evaluation measures |
+| S096 | Local release gates and reviewer route; external release provenance is recorded in Validation |
