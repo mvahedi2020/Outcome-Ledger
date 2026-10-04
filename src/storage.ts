@@ -1,4 +1,5 @@
 import {fresh,KEY,valid,type Ledger} from './domain'
+export function safeStorage():Pick<Storage,'getItem'|'setItem'>{try{return window.localStorage}catch{return {getItem:()=>{throw Error('Storage unavailable')},setItem:()=>{throw Error('Storage unavailable')}}}}
 export type Read={kind:'empty'|'compatible'|'invalid'|'unreadable';raw:string|null;value:Ledger}
 export function read(storage:Pick<Storage,'getItem'>):Read{
  let raw:string|null
