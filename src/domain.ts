@@ -12,7 +12,7 @@ export const fixtures:Record<Scenario,{label:string; baseline:Baseline|null}>={
  missing:{label:'Missing baseline',baseline:null},
  wrong:{label:'Incompatible baseline',baseline:{id:'B2',minutes:300,population:'Elm support team · 30 weekly handoffs',unit:measure,exposure:'30 handoffs across one complete five-day week',window:'2026-09-07 through 2026-09-11'}}
 }
-export const atoms=[{id:'routing',name:'Route owner',minutes:30,claims:['A']},{id:'lookup',name:'Look up handoff context',minutes:10,claims:['A','B']},{id:'reentry',name:'Re-enter context',minutes:20,claims:['B']}]
+export const atoms=[{id:'routing',name:'Route owner',assumption:'20 handoffs × assumed 1.5 minutes of routing avoided',minutes:30,claims:['A']},{id:'lookup',name:'Look up handoff context',assumption:'20 handoffs × assumed 0.5 minutes of lookup avoided',minutes:10,claims:['A','B']},{id:'reentry',name:'Re-enter context',assumption:'20 handoffs × assumed 1 minute of re-entry avoided',minutes:20,claims:['B']}]
 export const claims=[{id:'A',name:'Routing guide',output:'Guide delivered · September 14',owner:'Nia · Support lead',adoption:'16 of 20 handoffs used the guide',minutes:40},{id:'B',name:'Context card',output:'Card delivered · September 14',owner:'Eli · Enablement lead',adoption:'12 of 20 handoffs used the card',minutes:30}]
 export const causalLimit='Descriptive comparison only. No control group; staffing, case mix and seasonality may explain changes. Delivery and adoption do not establish causation.'
 export function observation(scenario:Scenario){
