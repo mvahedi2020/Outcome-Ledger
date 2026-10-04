@@ -2,7 +2,7 @@ import {test,expect,type Page} from '@playwright/test'
 import {KEY,fresh,snapshot,LIMIT} from '../src/domain'
 const start=async(page:Page)=>{await page.goto('./');await expect(page.getByRole('heading',{name:'From output to benefit'})).toBeVisible()}
 const preview=async(page:Page)=>{await page.getByRole('button',{name:'Preview decision'}).click();await expect(page.getByRole('dialog')).toBeVisible()}
-const confirm=async(page:Page)=>{await preview(page);await page.getByRole('button',{name:'Confirm review',exact:true}).click()}
+const confirm=async(page:Page)=>{await preview(page);await page.getByRole('button',{name:'Confirm review',exact:true}).click();await expect(page.getByRole('button',{name:'Preview decision'})).toBeFocused()}
 const raw=async(page:Page)=>page.evaluate(key=>localStorage.getItem(key),KEY)
 test('primary journey and self-contained immutable export',async({page})=>{
  await start(page);await page.getByRole('button',{name:'Inspect Context card'}).click();await expect(page.getByRole('heading',{name:'Context card',exact:true})).toBeVisible()

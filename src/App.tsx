@@ -10,7 +10,7 @@ export default function App(){
  const [selected,setSelected]=useState('A');const [choice,setChoice]=useState<Choice>('investigate');const [owner,setOwner]=useState('Nia · Support lead');const [rationale,setRationale]=useState('Compare case mix before extending the rollout.');const [questions,setQuestions]=useState('Did staffing or case complexity change between the two periods?');const [withdrawReason,setWithdrawReason]=useState('');const [preview,setPreview]=useState<Preview|null>(null)
  const dialog=useRef<HTMLDialogElement>(null);const opener=useRef<HTMLElement|null>(null)
  useEffect(()=>{if(preview)dialog.current?.showModal();else if(dialog.current?.open)dialog.current.close()},[preview])
- function close(){setPreview(null);setTimeout(()=>opener.current?.focus(),0)}
+ function close(){dialog.current?.close();setPreview(null);opener.current?.focus()}
  const result=observation(ledger.scenario),overlap=reconcile(),evidence=snapshot(ledger.scenario);const claim=claims.find(c=>c.id===selected)!
  function apply(value:Ledger){const outcome=write(safeStorage(),saved.current,value);setNotice(outcome.notice);if(outcome.ok){setLedger(value);saved.current=outcome.read}return outcome.ok}
  function load(){const next=read(safeStorage());saved.current=next;if(next.kind==='empty'||next.kind==='compatible'){setLedger(next.value);setNotice('Loaded compatible saved state. Review the evidence again before recording a decision.')}else setNotice(next.kind==='invalid'?'Invalid saved data preserved. Current work remains in memory. Export it before reset.':'Storage unreadable. Current work remains in memory; refresh or closing may lose it.');}
