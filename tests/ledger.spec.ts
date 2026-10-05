@@ -382,3 +382,33 @@ test("production security metadata docs route and no external requests", async (
   }
   expect(external).toEqual([]);
 });
+
+
+test("malformed saved choice stays recoverable without a render crash", async ({ page }) => {
+  const faults: string[] = [];
+  page.on("pageerror", (error) => faults.push(error.message));
+  await start(page);
+  await confirm(page);
+  const damaged = await page.evaluate((key) => {
+    const state = JSON.parse(localStorage.getItem(key)!);
+    state.reviews[0].choice = ["continue"];
+    const raw = JSON.stringify(state);
+    localStorage.setItem(key, raw);
+    return raw;
+  }, KEY);
+  await page.reload();
+  await expect(page.getByRole("status")).toContainText("Invalid saved data preserved");
+  expect(await raw(page)).toBe(damaged);
+  await preview(page);
+  await page.getByRole("button", { name: "Confirm review", exact: true }).click();
+  expect(await raw(page)).toBe(damaged);
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(await raw(page)).toBe(damaged);
+  await page.getByRole("button", { name: "Preview reset" }).click();
+  await page.getByRole("button", { name: "Confirm reset" }).click();
+  await expect(page.getByRole("status")).toContainText("Reset complete");
+  await confirm(page);
+  await expect(page.locator(".record")).toHaveCount(1);
+  expect(faults).toEqual([]);
+});

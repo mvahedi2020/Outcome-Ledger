@@ -129,3 +129,34 @@ describe("raw value and readability boundaries", () => {
     );
   });
 });
+
+
+describe("saved enum types", () => {
+  const review = () => ({
+    id: "review-enum",
+    at: "2026-10-05T07:00:00.000Z",
+    choice: "continue",
+    owner: "Nia",
+    rationale: "Check comparable evidence.",
+    questions: "Did case mix change?",
+    evidence: snapshot("compatible"),
+  });
+  it.each(["compatible", "missing", "wrong"])(
+    "rejects an array-valued ledger scenario %s",
+    (scenario) => expect(valid({ ...fresh(), scenario: [scenario] })).toBe(false),
+  );
+  it.each(["continue", "investigate", "change"])(
+    "rejects an array-valued review choice %s",
+    (choice) => expect(valid({ ...fresh(), reviews: [{ ...review(), choice: [choice] }] })).toBe(false),
+  );
+  it("rejects an array-valued withdrawal reference", () => {
+    const r = review();
+    const withdrawal = { id: "withdraw-enum", reviewId: [r.id], at: r.at, reason: "Evidence needs another review." };
+    expect(valid({ ...fresh(), reviews: [r], withdrawals: [withdrawal] })).toBe(false);
+  });
+  it("rejects an array-valued scenario inside otherwise canonical evidence", () => {
+    const r = review();
+    const evidence = { ...r.evidence, scenario: ["compatible"] };
+    expect(valid({ ...fresh(), reviews: [{ ...r, evidence }] })).toBe(false);
+  });
+});

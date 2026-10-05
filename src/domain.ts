@@ -189,7 +189,7 @@ export const fresh = (): Ledger => ({
 });
 const object = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
-const bounded = (v: unknown, max: number) =>
+const bounded = (v: unknown, max: number): v is string =>
   typeof v === "string" && v.trim().length > 0 && v.length <= max;
 export function valid(v: unknown): v is Ledger {
   if (
@@ -197,7 +197,8 @@ export function valid(v: unknown): v is Ledger {
     v.schema !== 1 ||
     !Number.isSafeInteger(v.revision) ||
     Number(v.revision) < 0 ||
-    !["compatible", "missing", "wrong"].includes(String(v.scenario)) ||
+    typeof v.scenario !== "string" ||
+    !["compatible", "missing", "wrong"].includes(v.scenario) ||
     !Array.isArray(v.reviews) ||
     !Array.isArray(v.withdrawals) ||
     v.reviews.length > LIMIT ||
@@ -209,15 +210,17 @@ export function valid(v: unknown): v is Ledger {
     if (
       !object(r) ||
       !bounded(r.id, 80) ||
-      ids.has(String(r.id)) ||
+      ids.has(r.id) ||
       !bounded(r.owner, 100) ||
       !bounded(r.rationale, 1500) ||
       !bounded(r.questions, 1500) ||
-      !["continue", "investigate", "change"].includes(String(r.choice)) ||
+      typeof r.choice !== "string" ||
+      !["continue", "investigate", "change"].includes(r.choice) ||
       typeof r.at !== "string" ||
       !Number.isFinite(Date.parse(r.at)) ||
       !object(r.evidence) ||
-      !["compatible", "missing", "wrong"].includes(String(r.evidence.scenario))
+      typeof r.evidence.scenario !== "string" ||
+      !["compatible", "missing", "wrong"].includes(r.evidence.scenario)
     )
       return false;
     // Known version snapshots must match the complete canonical fixture, preventing fabricated saved evidence.
@@ -226,7 +229,7 @@ export function valid(v: unknown): v is Ledger {
       JSON.stringify(snapshot(r.evidence.scenario as Scenario))
     )
       return false;
-    ids.add(String(r.id));
+    ids.add(r.id);
   }
   const withdrawn = new Set<string>();
   const eventIds = new Set<string>();
@@ -234,16 +237,17 @@ export function valid(v: unknown): v is Ledger {
     if (
       !object(w) ||
       !bounded(w.id, 80) ||
-      eventIds.has(String(w.id)) ||
-      !ids.has(String(w.reviewId)) ||
-      withdrawn.has(String(w.reviewId)) ||
+      eventIds.has(w.id) ||
+      typeof w.reviewId !== "string" ||
+      !ids.has(w.reviewId) ||
+      withdrawn.has(w.reviewId) ||
       !bounded(w.reason, 1500) ||
       typeof w.at !== "string" ||
       !Number.isFinite(Date.parse(w.at))
     )
       return false;
-    withdrawn.add(String(w.reviewId));
-    eventIds.add(String(w.id));
+    withdrawn.add(w.reviewId);
+    eventIds.add(w.id);
   }
   return true;
 }
