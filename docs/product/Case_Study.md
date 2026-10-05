@@ -18,9 +18,13 @@ Reviews require written rationale and open questions. This adds friction, but ca
 
 ## What the prototype demonstrates
 
-The working journey connects outputs, adoption and benefit; eligibility recovers when a compatible baseline is restored; duplicate workflow value is exposed; reviewed decisions remain unchanged when current evidence changes; exports include their complete context. Software checks cover these behaviors, adversarial storage conditions, keyboard access, and constrained layouts.
+The working journey connects outputs, adoption and benefit; eligibility recovers when a compatible baseline is restored; duplicate workflow value is exposed; reviewed decisions remain unchanged when current evidence changes; exports include their complete context. Software checks cover these decision and recovery boundaries, keyboard access, and constrained layouts.
 
 No human research was conducted. Proposed evaluation asks whether a reviewer can explain output versus benefit, baseline compatibility, duplicate counting, and accountability. Software checks are not evidence of reviewer comprehension or actual program value.
+
+## Next investment decision
+
+Before extending the ledger, ask program owners to challenge the shared lookup assumption and distinguish the descriptive 60-minute change from the separate forecast. Compare the resulting investment discussion with a delivery checklist: does the added evidence expose a material unanswered question? If measurement and ownership remain unclear, improve those agreements before adding benefit categories. Any real value case must consider adoption, measurement effort, ongoing support cost and alternative uses of the investment; converting hypothetical saved minutes into money would require further assumptions and causal evidence.
 
 ## Attribution and discussion
 
