@@ -4,3 +4,8 @@ test-results/
 playwright-report/
 evidence/
 .DS_Store
+
+# Local credentials must stay outside the published sample.
+.env
+.env.*
+!.env.example
