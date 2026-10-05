@@ -1,5 +1,7 @@
 # Outcome Ledger
 
+[Read the formatted product documents](https://mvahedi2020.github.io/Outcome-Ledger/docs/index.html).
+
 **What evidence is needed to recognize a benefit, and when should the next investment be reconsidered?** Outcome Ledger is a fictional PM workspace for a support program owner who needs to trace delivery, adoption, and value without treating a shipped output as a proven benefit.
 
 [Open the interactive demo](https://mvahedi2020.github.io/Outcome-Ledger/).

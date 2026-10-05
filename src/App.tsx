@@ -619,8 +619,8 @@ export default function App() {
             </p>
           </section>
           <footer>
-            <a href="docs/product/Case_Study.md">PM case study ↗</a>
-            <a href="docs/product/Sample_Walkthrough.md">
+            <a href="docs/product/Case_Study.html">PM case study ↗</a>
+            <a href="docs/product/Sample_Walkthrough.html">
               Reviewer walkthrough ↗
             </a>
             <span>Fictional data · No human research conducted</span>
