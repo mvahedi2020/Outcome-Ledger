@@ -1,5 +1,9 @@
 # Case Study — From delivered outputs to accountable benefits
 
+Check whether a finished project has evidence of a useful result. Compare the before-and-after figures and avoid counting the same possible saving twice. The example figures are fictional.
+
+**The product choice:** Distinguish completed work, observed change and a benefit that still needs evidence. [Try the sample](https://mvahedi2020.github.io/Outcome-Ledger/) · [Follow the walkthrough](Sample_Walkthrough.md).
+
 ## Product decision
 
 Outcome Ledger asks a program owner what evidence is still missing before they can honestly say delivery created value. The product puts a contribution map, comparable baseline, and shared workflow rule in the same review path. It makes a claim inspectable before it becomes an investment decision.

@@ -2,7 +2,9 @@
 
 [Read the formatted product documents](https://mvahedi2020.github.io/Outcome-Ledger/docs/index.html).
 
-**What evidence is needed to recognize a benefit, and when should the next investment be reconsidered?** Outcome Ledger is a fictional PM workspace for a support program owner who needs to trace delivery, adoption, and value without treating a shipped output as a proven benefit.
+Check whether a finished project has evidence of a useful result. Compare the before-and-after figures and avoid counting the same possible saving twice. The example figures are fictional. All records in this demo are fictional.
+
+**Try it:** Compare the compatible and missing-baseline examples, then review the evidence behind a continue or investigate decision. [Open the demo](https://mvahedi2020.github.io/Outcome-Ledger/) · [Follow the walkthrough](docs/product/Sample_Walkthrough.md).
 
 [Open the interactive demo](https://mvahedi2020.github.io/Outcome-Ledger/).
 
