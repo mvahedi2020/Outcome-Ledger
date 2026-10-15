@@ -4,6 +4,12 @@ Check whether a finished project has evidence of a useful result. Compare the be
 
 **The product choice:** Distinguish completed work, observed change and a benefit that still needs evidence. [Try the sample](https://mvahedi2020.github.io/Outcome-Ledger/) · [Follow the walkthrough](Sample_Walkthrough.md).
 
+## Experience and decision
+
+My product and program work includes outcome measurement, program KPIs and executive reporting. This example asks what evidence connects delivered work to a useful change. This is a separate fictional portfolio exercise; its records, rules and results do not reproduce an employer system.
+
+**Decision to challenge:** What evidence is missing before a team can attribute a benefit to its work? A compatible before-and-after comparison and a forecast can inform a discussion without proving causality or financial return.
+
 ## Product decision
 
 Outcome Ledger asks a program owner what evidence is still missing before they can honestly say delivery created value. The product puts a contribution map, comparable baseline, and shared workflow rule in the same review path. It makes a claim inspectable before it becomes an investment decision.

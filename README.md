@@ -6,6 +6,8 @@ Check whether a finished project has evidence of a useful result. Compare the be
 
 **Try it:** Compare the compatible and missing-baseline examples, then review the evidence behind a continue or investigate decision. [Open the demo](https://mvahedi2020.github.io/Outcome-Ledger/) · [Follow the walkthrough](docs/product/Sample_Walkthrough.md).
 
+**Experience connection:** My product and program work includes outcome measurement, program KPIs and executive reporting. This example asks what evidence connects delivered work to a useful change. [Read the decision to challenge](docs/product/Case_Study.md#experience-and-decision).
+
 [Open the interactive demo](https://mvahedi2020.github.io/Outcome-Ledger/).
 
 Start with the [PM case study](docs/product/Case_Study.md), follow the [reviewer walkthrough](docs/product/Sample_Walkthrough.md), and inspect the [sample contract](docs/product/Sample_Contract.md). The [product brief](docs/product/Product_Brief.md), [PRD](docs/product/PRD.md), [decisions and risks](docs/product/Decisions_and_Risks.md), and [validation](docs/product/Validation.md) explain the scope and evidence.
