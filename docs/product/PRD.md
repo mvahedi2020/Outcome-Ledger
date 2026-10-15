@@ -1,5 +1,17 @@
 # PRD — Evidence before value
 
+## Product decision brief
+
+**Primary user:** A program owner reviewing whether completed work has produced a useful result.
+
+**Problem hypothesis:** Delivery status, adoption and estimated savings can be mixed together into a benefit claim that the evidence cannot support.
+
+**Scope choice:** Keep delivery, comparable observations and overlapping forecasts distinct before recording an investment review.
+
+**Evidence needed:** Judge whether reviewers can identify missing evidence and avoid double counting in proposed sessions. The fictional figures do not establish real savings or return on investment.
+
+The [case study](Case_Study.md) explains the experience connection, alternatives and cost of the choice. The requirements below describe the bounded fictional prototype.
+
 ## Product requirements
 
 1. **Trace contribution.** Show each output’s delivery status, accountable owner, adoption numerator/denominator, adoption period, benefit period, and forecast contribution. Selecting an initiative changes its detail. Delivered status cannot create or alter an observation.
