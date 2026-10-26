@@ -2,7 +2,7 @@
 
 [Read the formatted product documents](https://mvahedi2020.github.io/Outcome-Ledger/docs/index.html).
 
-Check whether a finished project has evidence of a useful result. Compare the before-and-after figures and avoid counting the same possible saving twice. The example figures are fictional. All records in this demo are fictional.
+Check whether a finished project has evidence of a useful result. Compare the before-and-after figures and avoid counting the same possible saving twice. All records and example figures in this demo are fictional.
 
 **Try it:** Compare the compatible and missing-baseline examples, then review the evidence behind a continue or investigate decision. [Open the demo](https://mvahedi2020.github.io/Outcome-Ledger/) · [Follow the walkthrough](docs/product/Sample_Walkthrough.md).
 
@@ -23,3 +23,7 @@ Product tradeoff: conditional benefit recognition demands baseline and overlap r
 Use Node 24. `npm ci`, then `npm run dev`. Open `http://127.0.0.1:4195/Outcome-Ledger/`. Production checks: `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm audit`, and `npm run test:e2e`. The production browser suite starts and stops its own preview server. `npm run preview` serves the built app at the same route.
 
 Local browser storage is the only persistence. Export before reset or closing an in-memory session. No authentication, network data collection, analytics, live AI, or backend is included. Compatible refresh restores reviews; invalid bytes are preserved until a reviewed reset. The 12-review boundary stops new reviews without dropping old ones.
+
+## Typography
+
+The interface and product reading guide use Aptos for body text and Aptos Display for headings. Only Aptos, Aptos Display, SF Pro, SF Pro Rounded and Calibri are requested. Availability depends on the fonts installed on the viewing device; native Apple font aliases select SF Pro. No font files are bundled or downloaded.
